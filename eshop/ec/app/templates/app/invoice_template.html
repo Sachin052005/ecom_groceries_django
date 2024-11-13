@@ -1,0 +1,100 @@
+{% load static %}
+<title>Invoice #{{ order.id }}</title>
+
+{% block main-content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Ensures the footer is at the bottom if content is short */
+    }
+    #main-content {
+        flex: 1; /* Fills the remaining space */
+    }
+    h2, h3 {
+        text-align: center;
+        margin: 10px 0;
+    }
+    h4 {
+        text-align: left;
+        margin: 10px 0;
+    }
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    .invoice-table th, .invoice-table td {
+        border: 1px solid #000;
+        padding: 10px;
+        text-align: left;
+    }
+    .qr-code {
+        display: block;
+        margin: 20px auto;
+        width: 150px;
+        height: 150px;
+    }
+   
+</style>
+
+<div id="main-content">
+    <img src="{% static 'logo/logo.png' %}" alt="Company Logo" class="logo">
+
+    <h2>Invoice #{{ order.id }}</h2>
+    <h3>Grocery Store</h3>
+
+    <h4>From:</h4>
+    <p><strong>Grocery Store</strong></p>
+    <p>123 Grocery Lane</p>
+    <p>Cityville, ST 12345</p>
+    <p>Email: info@grocerystore.com</p>
+    <p>Phone: (123) 456-7890</p>
+
+    <h4>To:</h4>
+    <p><strong>Customer Name:</strong> {{ order.customer.name }}</p>
+    <p><strong>Address:</strong> {{ order.customer.locality }}, {{ order.customer.city }} - {{ order.customer.zipcode }}</p>
+    <p><strong>Phone:</strong> {{ order.customer.mobile }}</p>
+
+    <img src="{{ request.scheme }}://{{ request.get_host }}{{ order.product.Product_image.url }}" alt="{{ order.product.title }}" class="product-image">
+
+    <table class="invoice-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Discounted Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ order.product.title }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>Rs. {{ order.product.selling_price }}</td>
+                <td>Rs. {{ order.product.discounted_price }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Product Description:</h4>
+    <p>{{ order.product.description }}</p>
+    <h4>Composition:</h4>
+    <p>{{ order.product.composition }}</p>
+    <h4>Uses:</h4>
+    <p>{{ order.product.uses }}</p>
+
+    <h3>Total Cost: Rs. {{ order.total_cost }}</h3>
+
+    {% if qr_code %}
+        <h4>Scan QR Code to View Invoice:</h4>
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="qr-code">
+    {% endif %}
+
+    <p style="text-align: center;">Thank you for your purchase! We hope to serve you again.</p>
+</div>
+
+
+{% endblock %}

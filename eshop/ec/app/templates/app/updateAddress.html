@@ -1,0 +1,57 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Update Address{% endblock title %}
+
+{% block main-content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">Update Address</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8"> <!-- Centered column for the form -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Welcome <span class="text-capitalize">{{ request.user.username }}</span></h3>
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        {% for fm in form %}
+                            <div class="mb-3">
+                                {{ fm.label_tag }} {{ fm }}
+                                <small class="text-danger">{{ fm.errors|striptags }}</small>
+                            </div>
+                        {% endfor %}
+                        <div class="d-flex justify-content-between mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-pencil-alt me-2"></i> Update
+                            </button>
+                            <a href="{% url 'address' %}" class="btn btn-danger">
+                                <i class="fas fa-arrow-left me-2"></i> Back
+                            </a>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger my-3">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 1rem; /* Rounded corners for the card */
+    }
+    .card-body {
+        padding: 2rem; /* Extra padding for the card body */
+    }
+    .btn {
+        width: 48%; /* Make buttons take equal space */
+    }
+</style>
+
+{% endblock main-content %}

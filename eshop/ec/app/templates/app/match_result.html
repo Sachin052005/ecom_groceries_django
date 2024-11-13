@@ -1,0 +1,44 @@
+{% extends 'app/base.html' %}
+{% block title %}Matched Products{% endblock title %}
+
+{% block main-content %}
+<section class="vh-100 bg-light">
+    <div class="container py-5">
+        <h1 class="text-center">Matching Product</h1>
+        {% if product %}
+            <div class="text-center">
+
+                    <div class="card shadow p-18 border-0">
+                        <h5 class="fw-bold text-primary">{{ product.title }}</h5>
+                        <img src="{{ product.Product_image.url }}" alt="{{ product.title }}" class="img-fluid container" style="max-width: 300px;">
+                       
+                        <h5 class="text-danger">Rs. {{ product.discounted_price }}/-</h5>
+                        <small class="text-muted text-decoration-line-through fs-6">
+                            <del>Rs. {{ product.selling_price }}/-</del>
+                        </small>
+                        <hr>
+                        <h4>Product Features:</h4>
+                        <ul class="list-unstyled fs-6">
+                            <li>{{ product.description }}</li>
+                            <li>Composition: {{ product.composition }}</li>
+                            <li>Uses: {{ product.uses }}</li>
+                        </ul>
+                        <div class="container">
+                            <form action="/add-to-cart" class="me-2">
+                                <input type="hidden" name="prod_id" value="{{ product.id }}" />
+                                <button type="submit" class="btn btn-primary ">
+                                    <i class="fas fa-shopping-cart "></i> Add to Cart
+                                </button>
+                            </form>
+                        </div>
+                       
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p>No matching product found.</p>
+        {% endif %}
+       
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,253 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Product Details{% endblock title %}
+
+{% block main-content %}
+<section class="vh-100 bg-light">
+    <div class="container py-5">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-md-6 col-lg-5">
+                <!-- Image Carousel -->
+                <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner zoom-container">
+                        {% for image in product_images %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <div class="zoom-wrapper">
+                                <img src="{{ image.image.url }}" class="d-block w-100 zoom-image" alt="{{ product.title }}" style="border-radius: 1rem; height: auto;">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow p-4 border-0">
+                    <h1 class="fw-bold text-primary">{{ product.title }}</h1>
+                    <h5 class="text-danger">Rs. {{ product.discounted_price }}/-</h5>
+                    <small class="text-muted text-decoration-line-through fs-6">
+                        <del>Rs. {{ product.selling_price }}/-</del>
+                    </small>
+                    <hr>
+                    <h4>Product Features:</h4>
+                    <ul class="list-unstyled fs-6">
+                        <li>{{ product.description }}</li>
+                        <li>Composition: {{ product.composition }}</li>
+                        <li>Uses: {{ product.uses }}</li>
+                    </ul>
+                    <div class="d-flex justify-content-between mt-4">
+                        <form action="/add-to-cart" class="me-2">
+                            <input type="hidden" name="prod_id" value="{{ product.id }}" />
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </form>
+                    </div>
+                    <p class="fw-bold">Average Rating: <span class="text-warning">{{ avg_rating|floatformat:1 }} ★</span> / 5 ★</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products Section -->
+        <h2 class="text-center my-5">Related Grocery Products</h2>
+        <div class="row">
+            {% if related_products %}
+                {% for prod in related_products %}
+                <div class="col-md-4 text-center mb-4">
+                    <div class="card bg-light text-dark shadow" style="border-radius: 1rem; max-width: 250px; margin: auto;">
+                        <a href="{% url 'product-detail' prod.id %}" class="text-decoration-none">
+                            <div class="d-flex justify-content-center">
+                                <img src="{{ prod.Product_image.url }}" class="card-img-top img-fluid" alt="{{ prod.title }}" style="height: 200px; width: auto; object-fit: cover; border-radius: 1rem 1rem 0 0;">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold text-primary">{{ prod.title }}</h5>
+                                <p class="card-text fw-bold text-danger">
+                                    Rs. {{ prod.discounted_price }}/-
+                                    <small class="fw-light text-muted text-decoration-line-through">Rs. {{ prod.selling_price }}</small>
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p>No related products found.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="my-5">
+            <h2>Reviews</h2>
+
+            <div class="btn-group mb-3 d-flex flex-wrap" role="group" aria-label="Review Ratings">
+                {% for rating, review_list in reviews_by_rating.items %}
+                <button type="button" class="btn btn-outline-primary me-2 mb-2 rounded-pill" data-bs-toggle="collapse" data-bs-target="#collapseRating{{ rating|slice:":-5" }}" aria-expanded="false" aria-controls="collapseRating{{ rating|slice:":-5" }}">
+                    {{ rating|slice:":-5" }} Star Reviews
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+        {% for rating, review_list in reviews_by_rating.items %}
+        <div class="collapse" id="collapseRating{{ rating|slice:":-5" }}">
+            <div class="reviews">
+                {% for review in review_list %}
+                    <div class="review-item mb-3 border p-3 rounded">
+                        <p class="fw-bold">{{ review.user.username }} rated <span class="text-warning">{{ review.rating }} ★</span>
+                            {% if review.rating == 5 %}
+                                <span class="text-warning">😄</span>  <!-- Star emoji for 5-star rating -->
+                            {% elif review.rating == 4 %}
+                                <span class="text-warning">😊</span> <!-- Four stars -->
+                            {% elif review.rating == 3 %}
+                                <span class="text-warning">😐</span> <!-- Three stars -->
+                            {% elif review.rating == 2 %}
+                                <span class="text-warning">😟</span> <!-- Two stars -->
+                            {% elif review.rating == 1 %}
+                                <span class="text-warning">😡</span> <!-- One star -->
+                            {% endif %}
+                        </p>
+                        <p>{{ review.comment }}</p>
+                        {% if review.image %}
+                            <div class="mt-2">
+                                <img src="{{ review.image.url }}" class="img-fluid" alt="Review Image" style="max-height: 200px; object-fit: cover; border-radius: 0.5rem;">
+                            </div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p>No reviews yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Review Submission Form -->
+    <div class="my-5 d-flex justify-content-center">
+        <div class="w-50"> <!-- Adjust the width as needed -->
+            <h3 class="mt-4 text-center">Leave a Review</h3>
+            {% if request.user.is_authenticated %}
+                <form method="post" class="border p-4 rounded shadow" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if review_form.errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                                {% for field in review_form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in review_form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="id_rating" class="form-label">Rating</label>
+                        {{ review_form.rating }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_comment" class="form-label">Comment</label>
+                        {{ review_form.comment }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_image" class="form-label">Upload an Image (optional)</label>
+                        <input type="file" name="image" accept="image/*" class="form-control" id="id_image">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </form>
+            {% else %}
+                <p class="text-center">You must be logged in to leave a review.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Zoom Effect JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const zoomContainers = document.querySelectorAll('.zoom-wrapper');
+        const zoomFactor = 2;
+
+        // Zoom effect on product images
+        zoomContainers.forEach(container => {
+            const zoomImage = container.querySelector('.zoom-image');
+
+            container.addEventListener('mousemove', function(e) {
+                const { offsetX, offsetY } = e;
+                const { width, height } = this;
+
+                const xPercent = (offsetX / width) * 100;
+                const yPercent = (offsetY / height) * 100;
+
+                zoomImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                zoomImage.style.transform = `scale(${zoomFactor})`;
+            });
+
+            container.addEventListener('mouseleave', function() {
+                zoomImage.style.transform = `scale(1)`;
+            });
+        });
+
+        // Handle review ratings button click
+        const ratingButtons = document.querySelectorAll('.btn-group .btn');
+        const reviewSections = document.querySelectorAll('.collapse');
+
+        ratingButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Collapse all review sections
+                reviewSections.forEach(section => {
+                    section.classList.remove('show');
+                });
+
+                // Show the selected rating reviews
+                const selectedRating = this.getAttribute('data-bs-target');
+                const collapseElement = document.querySelector(selectedRating);
+                collapseElement.classList.toggle('show');
+            });
+        });
+    });
+</script>
+
+<!-- Zoom Effect CSS -->
+<style>
+    .zoom-wrapper {
+        overflow: hidden;
+        position: relative;
+    }
+    .zoom-image {
+        transition: transform 0.2s ease;
+    }
+    .zoom-container {
+        cursor: zoom-in;
+    }
+    .reviews {
+        margin-top: 20px;
+    }
+    .review-item {
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background: #fff;
+    }
+    .review-item p {
+        margin: 0;
+    }
+    .review-item .text-warning {
+        color: #ffcc00; /* Yellow color for star rating */
+    }
+</style>
+
+<!-- Bootstrap JS (Add this if not included) -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-QXW6P0FjGpWv+59cFh1dUIN4FDMzLBy9kZ5vYTTf7F0KQ8Kh0elNRch7XOf3GpX" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-+0D9nIhF3IgqYhz6zLPnLS1aiGeGgU5G1i2POtUJ3Uu5fNxvKBYzU9QyYCltr5hG" crossorigin="anonymous"></script>
+
+{% endblock main-content %}

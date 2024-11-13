@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'app/css/owl.carousel.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'app/css/all.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'app/css/style.css' %}" />
+    <script src="http://checkout.razorpay.com/v1/checkout.js"></script>
+    <title>Grocery products | {% block title %}{% endblock title %}</title>
+    <style>
+        .content-margin {
+            margin-top: 110px; /* Adjust this value based on your navbar height */
+        }
+        .dropdown-item:hover {
+            background-color: #010102; /* Background color on hover */
+            color: white; /* Text color on hover */
+        }
+        .nav-item .nav-link:hover {
+            transform: scale(1.1); /* Zoom in effect */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="https://media.tenor.com/KFwN-qERWW8AAAAj/foodpanda-panda.gif" alt="Grocery shop GIF" style="width: 90px; height: 80px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {% if request.user.is_authenticated %}
+                        {% if request.user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'product_list' %}" style="color: rgb(255, 0, 170);">
+                                <i class="fas fa-tachometer-alt"></i> <strong>Sales Dashboard</strong>
+                            </a>
+                        </li>                        
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Category
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'category' 'AR' %}">Atta, Rice, Dal</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'OG' %}">Oil, Ghee</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'DB' %}">Dairy, Bakery</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'PS' %}">Pet Supplies</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'SS' %}">Spices, Salt, Sugar</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'DF' %}">Dry Fruits, Nuts, Seeds</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'CN' %}">Biscuits, Chips, Namkeens</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'BE' %}">Breakfast Essentials</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'BS' %}">Body, Skincare</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'BG' %}">Beauty, Grooming</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'OC' %}">Oral Care</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'BA' %}">Baby Care</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'HW' %}">Hygiene, Wellness</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'LD' %}">Laundry, Dishwash</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'HC' %}">Household, Cleaning</a></li>
+                                <li><a class="dropdown-item" href="{% url 'category' 'HK' %}">Home, Kitchen</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item mx-2">
+                            <a href="{% url 'showcart' %}" class="nav-link text-white">
+                                <i class="fas fa-shopping-cart" style="margin-right: 5px;"></i>
+                                <span class="badge bg-danger">
+                                    {% if totalitem and totalitem|add:"0" > 0 %}
+                                        {{ totalitem }}
+                                    {% endif %}
+                                </span>
+                                Cart
+                            </a>
+                        </li>
+                        <li class="nav-item mx-2">
+                            <a href="{% url 'orders' %}" class="nav-link text-white">Orders</a>
+                        </li>
+                        <li class="nav-item mx-2">
+                            <a href="{% url 'delivered_orders' %}" class="nav-link text-white">Delivered</a>
+                        </li>
+                        <li class="nav-item dropdown mx-2">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle" style="font-size: 1.2em; margin-right: 5px;"></i>
+                                {{ request.user.username }}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                                <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'passwordchange' %}">Change Password</a></li>
+                                <li>
+                                    <form method="POST" action="{% url 'logout' %}" style="margin: 0;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item mx-2">
+                            <a href="{% url 'login' %}" class="nav-link text-white">Login</a>
+                        </li>
+                        <li class="nav-item mx-2">
+                            <a href="{% url 'customerregistration' %}" class="nav-link text-white">Registration</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                      
+                <li class="nav-item dropdown mx-2" style="color:rgb(255, 255, 255);">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; align-items: center;">
+                        <!-- Replace the icon with an image as a background -->
+                        <span style="display: inline-block; width: 30px; height: 30px; background-image: url('https://cdn-icons-png.flaticon.com/512/1059/1059035.png'); background-size: cover; margin-right: 5px;"></span>
+                        Search by Upload
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                        <li>
+                            <form action="/upload/" method="post" enctype="multipart/form-data" style="padding: 10px;">
+                                {% csrf_token %}
+                                <input type="file" name="image" required>
+                                <button type="submit">Upload and Match</button>
+                            </form>  
+                        </li>
+                    </ul>
+                </li>
+                
+             
+                <form class="d-flex" role="search" action="/search" onsubmit="return handleSearch(event);">
+                    <input class="form-control me-2" type="search" placeholder="Search" name="search" aria-label="Search" id="searchInput">
+                    <button id="voiceSearchBtn" type="button" class="btn btn-info ms-2 voice-search-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </form>
+               
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-margin">
+        {% block banner-slider %} {% endblock banner-slider %}
+        {% block information %} {% endblock information %}
+        {% block main-content %} {% endblock main-content %}
+        {% block payment-gateway %} {% endblock payment-gateway %}
+    </div>
+
+    <footer class="container-fluid fixed-bottom bg-success text-center p-2 mt-5">
+        copyright : 2022 || Developed by : Sachin Technology
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="{% static 'app/js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'app/js/all.min.js' %}"></script>
+    <script src="{% static 'app/js/myscript.js' %}"></script>
+</body>
+</html>

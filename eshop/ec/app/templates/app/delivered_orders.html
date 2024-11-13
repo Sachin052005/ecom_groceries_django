@@ -1,0 +1,68 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Delivered Orders{% endblock title %}
+
+{% block main-content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">Delivered Orders</h1>
+    <div class="row">
+        <div class="col-md-9 mx-auto">
+            {% if delivered_orders %}
+                {% for order in delivered_orders %}
+                <div class="col-md-12 mb-4"> <!-- Full width card for each order -->
+                    <div class="card bg-light text-dark shadow" style="border-radius: 1rem;">
+                        <div class="row g-0">
+                            <div class="col-md-4 d-flex justify-content-center align-items-center">
+                                <img src="{{ order.product.Product_image.url }}" class="img-fluid" alt="Product Image" style="height: 200px; width: auto; object-fit: cover; border-radius: 1rem 0 0 1rem;">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ order.product.title }}</h5>
+                                    <p class="card-text"><strong>Quantity:</strong> {{ order.quantity }}</p>
+                                    <p class="card-text"><strong>Price:</strong> Rs. {{ order.total_cost }}</p>
+                                    <p class="card-text"><strong>Address:</strong> {{ order.customer.name }}, {{ order.customer.locality }}, {{ order.customer.city }} - {{ order.customer.zipcode }}</p>
+                                    <p class="card-text"><strong>Phone:</strong> {{ order.customer.mobile }}</p>
+
+                                    <div class="d-flex align-items-center mb-3">
+                                        {% if order.status == 'Delivered' %}
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <div class="progress flex-grow-1" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Delivered</div>
+                                            </div>
+                                        {% elif order.status == 'Cancelled' %}
+                                            <i class="fas fa-times-circle text-danger me-2"></i>
+                                            <div class="progress flex-grow-1" style="height: 20px;">
+                                                <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Cancelled</div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if order.status == 'Delivered' %}
+                                    <!-- QR Code Section -->
+                                    <div class="text-center mt-3">
+                                        <img src="{% url 'generate_qr' order.id %}" alt="QR Code for Invoice" class="img-fluid" style="max-width: 150px;">
+                                        <p class="mt-2 d-flex justify-content-center align-items-center">
+                                            <i class="fas fa-qrcode me-2"></i> Scan to view the invoice
+                                        </p>
+
+                                        <!-- Download Links -->
+                                        <div class="download-links">
+                                            <a href="{% url 'download_invoice' order.id %}" class="btn btn-primary">Download PDF Invoice</a>
+                                            <a href="{% url 'generate_qr' order.id %}" class="btn btn-secondary">Download QR Code</a>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">No delivered or cancelled orders found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

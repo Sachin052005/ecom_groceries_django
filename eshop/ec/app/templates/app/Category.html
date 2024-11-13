@@ -1,0 +1,37 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Category{% endblock title %}
+
+{% block main-content %}
+<section class="vh-100 gradient-custom">
+    <div class="container py-5 h-100">
+        <h2 class="text-center mb-4">Products in Category</h2> <!-- Adjusted heading for clarity -->
+        <div class="row">
+            {% if products %}
+                {% for prod in products %}
+                <div class="col-md-4 text-center mb-4">
+                    <div class="card bg-light text-dark shadow" style="border-radius: 1rem; max-width: 250px; margin: auto;"> <!-- Set max-width for card -->
+                        <a href="{% url 'product-detail' prod.id %}" class="text-decoration-none">
+                            <div class="d-flex justify-content-center">
+                                <img src="{{ prod.Product_image.url }}" class="card-img-top img-fluid" alt="{{ prod.title }}" style="height: 200px; width: auto; object-fit: cover; border-radius: 1rem 1rem 0 0;"> <!-- Centered image -->
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold text-primary">{{ prod.title }}</h5>
+                                <p class="card-text fw-bold text-danger">
+                                    Rs. {{ prod.discounted_price }}/-
+                                    <small class="fw-light text-muted text-decoration-line-through">Rs. {{ prod.selling_price }}</small>
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p>No products found in this category.</p> <!-- Updated message for no products -->
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock main-content %}

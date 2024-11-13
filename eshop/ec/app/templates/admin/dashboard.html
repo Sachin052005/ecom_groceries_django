@@ -1,0 +1,307 @@
+{% block content %}
+<div class="sidebar">
+    {% include 'admin/sidebar.html' %}
+</div>
+
+<div class="dashboard-container" style="padding-left: 10%;">
+    <h2 style="display: flex; justify-content: center;">Dashboard</h2>
+
+    <div class="card-container">
+        <!-- Product Card -->
+        <div class="card product-card" style="background-image: url('https://cliply.co/wp-content/uploads/2019/05/371905230_ECOMMERCE_400px.gif'); background-size: cover; background-position: center;">
+            <div class="card-body">
+                <div class="card-header">
+                    <i class="fas fa-box-open"></i>
+                    <h5 class="card-title">Total Products</h5>
+                </div>
+                <p class="card-text">{{ total_products|default:0 }}</p>
+            </div>
+        </div>
+
+        <!-- Customer Card -->
+        <div class="card customer-card" style="background-image: url('https://cdn.dribbble.com/users/291221/screenshots/1425333/helper.gif'); background-size: cover; background-position: center;">
+            <div class="card-body">
+                <div class="card-header">
+                    <i class="fas fa-users"></i>
+                    <h5 class="card-title">Total Customers</h5>
+                </div>
+                <p class="card-text">{{ total_customers|default:0 }}</p>
+            </div>
+        </div>
+
+        <!-- Order Card -->
+        <div class="card order-card" style="background-image: url('https://x2-spse2-website.s3-ap-southeast-2.amazonaws.com/exceed/assets/images/loader.gif'); background-size: cover; background-position: center;">
+            <div class="card-body">
+                <div class="card-header">
+                    <i class="fas fa-cart-arrow-down"></i>
+                    <h5 class="card-title">Total Orders</h5>
+                </div>
+                <p class="card-text">{{ total_orders|default:0 }}</p>
+            </div>
+        </div>
+
+        <!-- Cart Card -->
+        <div class="card cart-card" style="background-image: url('https://cdn.dribbble.com/users/1260892/screenshots/7151607/cart.gif'); background-size: cover; background-position: center;">
+            <div class="card-body">
+                <div class="card-header">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h5 class="card-title">Total Cart Items</h5>
+                </div>
+                <p class="card-text">{{ total_cart_items|default:0 }}</p>
+            </div>
+        </div>
+
+        <!-- Payment Card -->
+        <div class="card payment-card" style="background-image: url('https://cdn.dribbble.com/users/428452/screenshots/5675370/okcanimationn800.gif'); background-size: cover; background-position: center;">
+            <div class="card-body">
+                <div class="card-header">
+                    <i class="fas fa-credit-card"></i>
+                    <h5 class="card-title">Total Payment Items</h5>
+                </div>
+                <p class="card-text">{{ total_payment_items|default:0 }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flexbox container for splitting the screen into 4 parts -->
+    <div class="flex-container">
+        <!-- Bar Chart Container (1st section) -->
+        <div class="chart-container order-chart">
+            <canvas id="orderCountChart"></canvas>
+        </div>
+
+        <!-- Empty section (2nd section) for spacing -->
+        <div class="empty-container"></div>
+
+        <!-- Pie Chart Container (3rd section) -->
+        <div class="chart-container summary-chart">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <!-- Empty section (4th section) for spacing -->
+        <div class="empty-container"></div>
+    </div>
+
+    <!-- Line Chart for Product Prices -->
+    <div class="flex-container">
+        <div class="chart-container price-chart">
+            <canvas id="priceChart"></canvas>
+        </div>
+    </div>
+
+<style>
+   .dashboard-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.card-container {
+    display: flex;
+    gap: 20px; /* Space between the cards */
+    justify-content: flex-start; /* Align cards to the left */
+    margin-top: 20px;
+    width: 100%; /* Ensure it spans the full width of the screen */
+    max-width: 1300px; /* Limit the container's maximum width */
+    box-sizing: border-box;
+    flex-wrap: nowrap; /* Prevent cards from wrapping to the next line */
+    overflow-x: auto; /* Allow horizontal scrolling if necessary */
+}
+
+.card {
+    flex: 0 0 auto; /* Prevent cards from stretching */
+    width: 240px; /* Set a fixed width for each card */
+    margin-bottom: 20px; /* Space between rows */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+.chart-container {
+    width: 45%;
+    height: 300px;
+    flex-grow: 0;
+    flex-shrink: 1;
+    margin-left: 100px;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex; /* Enable flexbox for centering */
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    overflow: hidden; /* Ensure the content stays within the border-radius */
+    background-color: #f1f8f1; /* Optional: background color for the chart container */
+}
+
+#chart {
+    width: 90%; /* Make the chart smaller to fit inside the container */
+    height: 90%; /* Adjust height to fit inside the container */
+}
+
+.product-card { background-color: #d1e7dd; }
+.customer-card { background-color: #f8d7da; }
+.order-card { background-color: #fff3cd; }
+.cart-card { background-color: #cfe2ff; }
+
+.card-body {
+    padding: 15px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    color: #050505;
+}
+
+.card-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.chart-container {
+    width: 45%;
+    height: 300px;
+    flex-grow: 0;
+    flex-shrink: 1;
+    margin-left: 100px;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.order-chart {
+    background-color: #f3f6fc;
+}
+
+.summary-chart {
+    background-color: #f1f8f1;
+}
+
+.price-chart {
+    background-color: #e2f1f8;
+    width: 70%;
+    height: 500px;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(235, 230, 230, 0.1);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.empty-container {
+    width: 5%;
+    height: 400px;
+}
+
+#orderCountChart, #chart, #priceChart {
+    height: 100%;
+    width: 100%;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JSON Script for Chart Data -->
+{{ total_products|default:0|json_script:"total_products" }}
+{{ total_customers|default:0|json_script:"total_customers" }}
+{{ total_orders|default:0|json_script:"total_orders" }}
+{{ total_cart_items|default:0|json_script:"total_cart_items" }}
+{{ dates|json_script:"order_dates" }}
+{{ counts|json_script:"order_counts" }}
+{{ product_names|json_script:"product_names" }}
+{{ selling_prices|json_script:"selling_prices" }}
+{{ discounted_prices|json_script:"discounted_prices" }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const orderDates = JSON.parse(document.getElementById('order_dates').textContent);
+        const orderCounts = JSON.parse(document.getElementById('order_counts').textContent);
+        
+        const orderCountCtx = document.getElementById('orderCountChart').getContext('2d');
+        new Chart(orderCountCtx, {
+            type: 'bar',
+            data: {
+                labels: orderDates,
+                datasets: [{
+                    label: 'Order Count',
+                    data: orderCounts,
+                    backgroundColor: "#4e73df",
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: 'Order Count' }, beginAtZero: true }
+                }
+            }
+        });
+
+        const ctx = document.getElementById("chart").getContext('2d');
+        const totalProducts = JSON.parse(document.getElementById('total_products').textContent);
+        const totalCustomers = JSON.parse(document.getElementById('total_customers').textContent);
+        const totalOrders = JSON.parse(document.getElementById('total_orders').textContent);
+        const totalCartItems = JSON.parse(document.getElementById('total_cart_items').textContent);
+        
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Products', 'Customers', 'Orders', 'Cart Items'],
+                datasets: [{
+                    label: 'Summary',
+                    data: [totalProducts, totalCustomers, totalOrders, totalCartItems],
+                    backgroundColor: ['#36a2eb', '#ffcd56', '#ff6384', '#4bc0c0']
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        const priceCtx = document.getElementById("priceChart").getContext('2d');
+        const productNames = JSON.parse(document.getElementById('product_names').textContent);
+        const sellingPrices = JSON.parse(document.getElementById('selling_prices').textContent);
+        const discountedPrices = JSON.parse(document.getElementById('discounted_prices').textContent);
+
+        new Chart(priceCtx, {
+            type: 'line',
+            data: {
+                labels: productNames,
+                datasets: [{
+                    label: 'Selling Price',
+                    data: sellingPrices,
+                    borderColor: "#4e73df",
+                    fill: false
+                }, {
+                    label: 'Discounted Price',
+                    data: discountedPrices,
+                    borderColor: "#f1c40f",
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Product' } },
+                    y: { title: { display: true, text: 'Price' } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

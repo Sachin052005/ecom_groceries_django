@@ -1,0 +1,133 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Checkout{% endblock title %}
+
+{% block main-content %}
+<div class="container my-5 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    {% if message %}
+    {% for msg in message %}
+    <div class="alert alert-danger" role="alert">
+        {{ msg }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-4">
+            <h4 class="text-center">Order Summary</h4>
+            <hr>
+            <div class="card border">
+                <div class="card-body">
+                    <h3>Items in Your Order</h3>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Product Image</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Discounted Price</th>
+                                <th scope="col">Original Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                            <tr>
+                                <td class="text-center">
+                                    <img src="{{ item.product.Product_image.url }}" alt="{{ item.product.title }}" class="img-fluid" height="75" width="75">
+                                </td>
+                                <td>{{ item.product.title }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td style="color: rgb(253, 0, 0); font-weight: bold;">Rs. {{ item.product.discounted_price }}</td>
+                                <td style="color: rgb(6, 255, 48); font-weight: bold;">Rs. {{ item.product.selling_price }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td colspan="4" class="fw-bold">Total Cost + Rs. 40</td>
+                                <td class="fw-bold">Rs. {{ totalamount }}</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <small class="text-muted">Terms and Conditions: Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, ullam saepe! Iure optio repellat dolor velit, minus rem. Facilis cumque neque numquam laboriosam, accusantium adipisci nisi nihil in et quis?</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <h4 class="text-center">Select Shipping Address</h4>
+            <hr>
+            <form method="post" id="myform">
+                {% csrf_token %}
+                <div class="card">
+                    <div class="card-body">
+                        {% for ad in add %}
+                        <div class="address-card mb-3 d-flex align-items-start border p-2">
+                            <div class="form-check me-3">
+                                <input class="form-check-input address-radio" type="radio" name="custid" id="custadd{{ forloop.counter }}" value="{{ ad.id }}" required>
+                                <label class="form-check-label" for="custadd{{ forloop.counter }}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-dark" style="width: 20px; height: 20px;"></div>
+                                        <span class="ms-2 fw-bold">Select this address</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="fw-bold">{{ ad.name }}</h5>
+                                <p class="mb-1">Mobile: {{ ad.mobile }}</p>
+                                <p class="mb-1">{{ ad.locality }} {{ ad.city }} {{ ad.state }} - {{ ad.zipcode }}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        {% endfor %}
+                        <div class="form-group mb-3">
+                            <label for="totalamount" class="form-label">Total Amount</label>
+                            <input type="number" class="form-control" name="totalamount" value="{{ totalamount }}" readonly>
+                        </div>
+                        <div class="text-end">
+                            <button id="rzp-button1" type="button" class="btn btn-warning mt-3 px-5 fw-bold" disabled>
+                                <i class="fas fa-credit-card"></i> Make Payment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main-content %}
+
+{% block payment-gateway %}
+<script>
+    // Razorpay payment gateway options
+    var options = {
+        "key": "rzp_test_1Uk6lMzkjxJsPy",
+        "amount": "{{ razoramount }}",
+        "currency": "INR",
+        "name": "Grocery",
+        "description": "Purchase Product",
+        "order_id": "{{ order_id }}",
+        "handler": function (response) {
+            var form = document.getElementById("myform");  
+            window.location.href = `http://localhost:8000/paymentdone?order_id=${response.razorpay_order_id}&payment_id=${response.razorpay_payment_id}&cust_id=${form.elements["custid"].value}`;
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response) {
+        alert(response.error.description);
+    });
+
+    document.getElementById('rzp-button1').onclick = function (e) {
+        rzp1.open();
+        e.preventDefault();
+    };
+
+    // Enable the payment button when an address is selected
+    document.querySelectorAll('.address-radio').forEach(radio => {
+        radio.addEventListener('change', function () {
+            document.getElementById('rzp-button1').disabled = false;
+        });
+    });
+</script>
+{% endblock payment-gateway %}
